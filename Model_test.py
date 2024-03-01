@@ -1,4 +1,4 @@
-import torch, os, argparse, time, json
+import torch, os, argparse, time
 import usefull_functions as uf
 import data_models_generator as dmg
 
@@ -8,28 +8,16 @@ from skimage.metrics import structural_similarity as ssim
 from tqdm import tqdm
 
 
-
+current_file_directory = os.path.dirname(os.path.abspath(__file__))
 parser = argparse.ArgumentParser(description='PyTorch DnCNN')
 parser.add_argument('--model_name', default='model_rgb_1.pth', type=str, help="Nom du model qu'on souhaite entrainer ou tester")
 parser.add_argument('--sigma', default=25, type=int, help="Choix du sigma à utliser pour ,l'entrainement et le test. Attention un sigma de -1 rendra le sigma alétoire entre 0 et 50")
-parser.add_argument('--model_dir', default='/Models/', help='directory of the model')
-parser.add_argument('--test_data', default='/Projet/Data_rgb/Train', type=str, help='path of test data')
-parser.add_argument('--result_file',default='Scores PSNR débruitage.json',type = str,help = 'name of the file containing the results of the test')
+parser.add_argument('--model_dir', default=os.path.join(current_file_directory,'Models/')
+                    , type = str, help='directory of the model')
+parser.add_argument('--test_data', default=os.path.join(current_file_directory,'/Projet/Data_rgb/Train')
+                    , type=str, help='path of test data')
 parser.add_argument('--visualisation',default=0,type=int,help="Choisi d'afficher les images débruitée ou non")
 args, unknown = parser.parse_known_args()
-
-current_file_directory = os.path.dirname(os.path.abspath(__file__))
-
-
-##A voir si on garde ça ou pas jsp
-#On enleve 1 des deux psnr ?
-# le json on le vire ?
-# retourne rien ?
-
-
-psnr_results = {
-    'whatin': 'Contient les listes des psnr obtenus pour chaque sigma',
-}
 
 
 def model_test() :
@@ -61,18 +49,17 @@ def model_test() :
             if cuda :
                 batch_x, batch_y= batch_x.cuda(), batch_y.cuda()
                 
-
+            #Denoising
             start_time = time.time()
             noise_predicted = model(batch_y)
-        
             elapsed_time = time.time() - start_time
             denoising_time.append(elapsed_time)
-
             batch_predicted = batch_y - noise_predicted
 
-            batch_x = uf.visualisation_batch(batch_x)
-            batch_y = uf.visualisation_batch(batch_y)
-            batch_predicted = uf.visualisation_batch(batch_predicted)
+            #Results transformations for calculs
+            batch_x = uf.batch_visualisation(batch_x)
+            batch_y = uf.batch_visualisation(batch_y)
+            batch_predicted = uf.batch_visualisation(batch_predicted)
             
             #PSNR calculs 
             psnr_noise = psnr(batch_x,batch_y,data_range = 1.0)
@@ -91,15 +78,4 @@ def model_test() :
                              psnr_scores=(psnr_noise,psnr_denoise),
                              ssim_scores=(ssim_index_noise,ssim_index_denoise))
                
-    name_d = str(args.sigma) + '_d'
-    name_b = str(args.sigma) + '_b'
-    name_t = str(args.sigma) + '_t'
-    psnr_results[name_b] = psnr_noise_images
-    psnr_results[name_d] = psnr_denoise_images
-    psnr_results[name_t] = denoising_time
-
-
-    with open(args.result_file, 'w') as fichier:
-        json.dump(psnr_results, fichier)
-
-    return 
+    return  psnr_noise_images,psnr_denoise_images,ssim_noise_images,ssim_denoise_images,denoising_time

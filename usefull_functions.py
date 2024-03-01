@@ -34,6 +34,7 @@ def results_show(image1,image2,image3,ssim_scores,psnr_scores, figsize=(100,100)
     ax3.axis('off')
     plt.show()
 
+
 def batch_visualisation(batch_in):
     """permet d'extraire les images liées au batch en entrée pour pouvoir calculer des scores ou l'afficher"""
     batch_out = batch_in.squeeze(0).permute(1, 2, 0)
@@ -43,7 +44,7 @@ def batch_visualisation(batch_in):
     return batch_out
 
 
-def findLastCheckpoint(save_dir):
+def find_last_checkpoint(save_dir):
     file_list = glob.glob(os.path.join(save_dir, 'model_*.pth'))
     initial_epoch = 0
     model_name = ''
