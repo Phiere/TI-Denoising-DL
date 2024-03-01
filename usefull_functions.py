@@ -1,8 +1,8 @@
 
-import sys
+import sys,glob,os,re
 import datetime
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 def log(*args, **kwargs):
     print('\r',datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S:"), *args, **kwargs)
@@ -33,3 +33,33 @@ def results_show(image1,image2,image3,ssim_scores,psnr_scores, figsize=(100,100)
     ax3.set_title('Vérité Terrain',fontsize = 10)
     ax3.axis('off')
     plt.show()
+
+def batch_visualisation(batch_in):
+    """permet d'extraire les images liées au batch en entrée pour pouvoir calculer des scores ou l'afficher"""
+    batch_out = batch_in.squeeze(0).permute(1, 2, 0)
+    batch_out = batch_out.cpu()
+    batch_out = batch_out.detach().numpy().astype(np.float32)
+
+    return batch_out
+
+
+def findLastCheckpoint(save_dir):
+    file_list = glob.glob(os.path.join(save_dir, 'model_*.pth'))
+    initial_epoch = 0
+    model_name = ''
+    if file_list:
+
+        for file_ in file_list:
+            result = file_.split('_')[-1]
+            result = result.replace('.pth','')
+            result = result.replace('e','')
+            try : 
+                int(result)
+            except :
+                print("Models with wrong names are detected")
+            else :  
+                if int(result) > initial_epoch :
+                    initial_epoch = int(result)
+                    model_name = file_
+                  
+    return initial_epoch,model_name

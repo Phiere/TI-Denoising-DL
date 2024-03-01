@@ -1,18 +1,12 @@
-from IPython.display import display, clear_output
-import torch
+import torch, os, argparse, time, json
 import usefull_functions as uf
 import data_models_generator as dmg
-import os
-import numpy as np
-import matplotlib.pyplot as plt
+
 from torch.utils.data import DataLoader
-import argparse
 from skimage.metrics import peak_signal_noise_ratio as psnr
-#from skimage.metrics import structural_similarity as ssim
-import time
-import json
+from skimage.metrics import structural_similarity as ssim
 from tqdm import tqdm
-import usefull_functions as uf
+
 
 
 parser = argparse.ArgumentParser(description='PyTorch DnCNN')
@@ -25,23 +19,36 @@ parser.add_argument('--visualisation',default=0,type=int,help="Choisi d'afficher
 args, unknown = parser.parse_known_args()
 
 current_file_directory = os.path.dirname(os.path.abspath(__file__))
+
+
+##A voir si on garde ça ou pas jsp
+#On enleve 1 des deux psnr ?
+# le json on le vire ?
+# retourne rien ?
+
+
 psnr_results = {
     'whatin': 'Contient les listes des psnr obtenus pour chaque sigma',
 }
+
 
 def model_test() :
 
     psnr_noise_images = []
     psnr_denoise_images = []
+    ssim_noise_images = []
+    ssim_denoise_images = []
     denoising_time = []
 
     cuda = torch.cuda.is_available()
-    if cuda :
-        model = torch.load(os.path.join(current_file_directory,args.model_dir,args.model_name)).cuda()
-    else :
-        model = torch.load(os.path.join(current_file_directory,args.model_dir,args.model_name))
+    model = torch.load(os.path.join(current_file_directory,args.model_dir,args.model_name))
 
-    uf.log('load trained model')
+    if cuda :
+        torch.cuda.synchronize()
+        model.cuda()
+        uf.log('load trained model on gpu')
+    else :
+        uf.log('load trained model on cpu')
 
     model.eval()
     DDataset = dmg.DenoisingDataset(data_path=os.path.join(current_file_directory,args.test_data)
@@ -49,41 +56,40 @@ def model_test() :
     DLoader = DataLoader(dataset=DDataset,batch_size=1, shuffle=True)
 
     with torch.no_grad():
-        for batch_y, batch_x, noise in tqdm(DLoader,f" Chargement des images sig = {args.sig}"):
+        for batch_y, batch_x,_ in tqdm(DLoader,f" Chargement des images sig = {args.sig}"):
 
             if cuda :
-                torch.cuda.synchronize()
-                batch_x, batch_y,noise = batch_x.cuda(), batch_y.cuda(), noise.cuda()
+                batch_x, batch_y= batch_x.cuda(), batch_y.cuda()
                 
+
             start_time = time.time()
-            batch_predicted = model(batch_y)
+            noise_predicted = model(batch_y)
+        
             elapsed_time = time.time() - start_time
             denoising_time.append(elapsed_time)
 
-            batch_predicted = batch_y - batch_predicted
+            batch_predicted = batch_y - noise_predicted
 
-            batch_x = batch_x.squeeze(0).permute(1, 2, 0)
-            batch_x = batch_x.cpu()
-            batch_x = batch_x.detach().numpy().astype(np.float32)
-
-            batch_y = batch_y.squeeze(0).permute(1, 2, 0)
-            batch_y = batch_y.cpu()
-            batch_y = batch_y.detach().numpy().astype(np.float32)
-
-            batch_predicted = batch_predicted.squeeze(0).permute(1, 2, 0)
-            batch_predicted = batch_predicted.cpu()
-            batch_predicted = batch_predicted.detach().numpy().astype(np.float32)
-
+            batch_x = uf.visualisation_batch(batch_x)
+            batch_y = uf.visualisation_batch(batch_y)
+            batch_predicted = uf.visualisation_batch(batch_predicted)
+            
+            #PSNR calculs 
             psnr_noise = psnr(batch_x,batch_y,data_range = 1.0)
             psnr_denoise = psnr(batch_x,batch_predicted,data_range = 1.0)
-
             psnr_noise_images.append(psnr_noise)
             psnr_denoise_images.append(psnr_denoise)
+            
+            #SSIM calculs 
+            ssim_index_noise,_ = ssim(batch_x,batch_y,channel_axis = -1,full=True)
+            ssim_index_denoise,_ = ssim(batch_x,batch_predicted,channel_axis = -1,full=True)
+            ssim_noise_images.append(ssim_index_noise)
+            ssim_denoise_images.append(ssim_index_denoise)
 
             if args.visualisation :
                 uf.results_show(image1=batch_x,image2=batch_predicted,image3=batch_y,
                              psnr_scores=(psnr_noise,psnr_denoise),
-                             ssim_scores=(1,1))
+                             ssim_scores=(ssim_index_noise,ssim_index_denoise))
                
     name_d = str(args.sigma) + '_d'
     name_b = str(args.sigma) + '_b'
@@ -97,5 +103,3 @@ def model_test() :
         json.dump(psnr_results, fichier)
 
     return 
-
-model_test()
