@@ -20,10 +20,9 @@ def results_show(image1,image2,image3,ssim_scores,psnr_scores, figsize=(100,100)
 
     f, (ax1, ax2, ax3) = plt.subplots(1, 3,figsize=figsize)
 
-    # Affichez chaque image sur son axe respectif
     ax1.imshow(image1)
     ax1.set_title('Image Bruitée'+'\n'+f'PSNR = {psnr1}'+'\n'+f'SSIM = {ssim1}',fontsize = 10)
-    ax1.axis('off')  # Désactive les axes pour une meilleure visibilité
+    ax1.axis('off') 
 
     ax2.imshow(image2)
     ax2.set_title('Image Débruitée'+'\n'+f'PSNR = {psnr2}'+'\n'+f'SSIM = {ssim2}',fontsize = 10)

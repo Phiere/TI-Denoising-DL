@@ -39,10 +39,18 @@ training_scheduler = MultiStepLR(training_optimizer, milestones=[training_nb_epo
 
 
 def model_training(network,optimizer,criterion,scheduler,nb_epoch,patch_size,batch_size) :
-    # model selection
+    """Entrainement et enregistement du modèle avec les options mises en paramètres
+    
+    network : type de réseau à entrainer
+    optimizer : optimsier choisi pour l'optimisation
+    criterion : critère choisi pour l'optimisation
+    scheduler : opérateur de changement de learning rate choisi pour l'entrainement
+    nb_epoch : nombre d'epoch maximal de l'entrainement
+    patch_size : taille des patch des images d'entrainement
+    batch_size : taille des batch utilisé pour l'optimisation"""
     print('===> Building model')
     
-    #Network initialisaton/recuperation
+
     model = network
     initial_epoch,model_name = uf.find_last_checkpoint(save_dir=args.model_dir) 
     if initial_epoch > 0:

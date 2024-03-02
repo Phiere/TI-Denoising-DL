@@ -22,7 +22,13 @@ args, unknown = parser.parse_known_args()
 
 
 def model_test() :
-
+    """Fonction de test sur la base de données en paramètres du réseau utilisé. Il est possible de visualiser les résultats obtenus
+    avec le paramètre visualisation
+    
+    psnr_noise_images,psnr_denoise_images : scores psnr des images bruitées et débruitées
+    ssim_noise_images,ssim_denoise_images : scores ssim des images bruitées et débruitées
+    denoising_time : temps de calcul pour le modèle utilisé
+    """
     psnr_noise_images = []
     psnr_denoise_images = []
     ssim_noise_images = []
@@ -82,7 +88,10 @@ def model_test() :
     return  psnr_noise_images,psnr_denoise_images,ssim_noise_images,ssim_denoise_images,denoising_time
 
 def photo_application(photo_path,model_path):
-
+    """Mise en application du modèle pour des images déjà bruitées
+    
+    photo_path : chemin de la photo à débruitée
+    model_path : chemin du modèle utilisé pour le débruitage"""
 
     model = torch.load(os.path.join(current_file_directory,model_path))
 
