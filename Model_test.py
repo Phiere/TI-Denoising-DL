@@ -22,7 +22,7 @@ args, unknown = parser.parse_known_args()
 
 
 def model_test() :
-    """Fonction de test sur la base de données en paramètres du réseau utilisé. Il est possible de visualiser les résultats obtenus
+    """Fonction de test sur la base de données en paramètre du réseau utilisé. Il est possible de visualiser les résultats obtenus
     avec le paramètre visualisation
     
     psnr_noise_images,psnr_denoise_images : scores psnr des images bruitées et débruitées

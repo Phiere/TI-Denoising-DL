@@ -39,15 +39,15 @@ training_scheduler = MultiStepLR(training_optimizer, milestones=[training_nb_epo
 
 
 def model_training(network,optimizer,criterion,scheduler,nb_epoch,patch_size,batch_size) :
-    """Entrainement et enregistement du modèle avec les options mises en paramètres
+    """Entraînement et enregistement du modèle avec les options mises en paramètre
     
-    network : type de réseau à entrainer
-    optimizer : optimsier choisi pour l'optimisation
+    network : type de réseau à entraîner
+    optimizer : optimseur choisi pour l'optimisation
     criterion : critère choisi pour l'optimisation
-    scheduler : opérateur de changement de learning rate choisi pour l'entrainement
-    nb_epoch : nombre d'epoch maximal de l'entrainement
-    patch_size : taille des patch des images d'entrainement
-    batch_size : taille des batch utilisé pour l'optimisation"""
+    scheduler : opérateur de changement de learning rate choisi pour l'entraînement
+    nb_epoch : nombre d'epoch maximal de l'entraînement
+    patch_size : taille des patch des images d'entraînement
+    batch_size : taille des batch utilisée pour l'optimisation"""
     print('===> Building model')
     
 

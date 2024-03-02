@@ -10,7 +10,7 @@ import os
 import numpy as np
 
 #Verifier que c'est bien rgb et pas autre chose
-#Au lieu de mettre training en arugment, mettre les transformations ?
+#Au lieu de mettre training en argument, mettre les transformations ?
 
 mean_db = [0.4273080293308286, 0.4416487863396897, 0.3839654446963002] 
 std_db = [0.21955110505223274, 0.20601368640713832, 0.20300565298427553]
@@ -50,7 +50,7 @@ class DenoisingDataset(Dataset):
 
 
 class PersonalDenoiserFataset(Dataset):
-    """Dataset pour débruiter des images déjà bruitée. Seulement utile pour une mise en application.
+    """Dataset pour débruiter des images déjà bruitées. Seulement utile pour une mise en application.
     """
     def __init__(self,data_path):
         super(PersonalDenoiserFataset, self).__init__()
@@ -68,6 +68,7 @@ class PersonalDenoiserFataset(Dataset):
 
 ##Va falloir essayer de comprendre les paramètres genre momentum ?
 class DnCNN(nn.Module):
+    """Création du réseau de neurones."""
     def __init__(self, depth=7, n_channels=64, image_channels=3, use_bnorm=True, kernel_size=3):
         super(DnCNN, self).__init__()
         kernel_size = 3
@@ -99,7 +100,7 @@ class DnCNN(nn.Module):
                 init.constant_(m.bias, 0)
 
 def mean_std_db_calcul(images_dir):
-    """Calculs des means et std de la data base d'entrainement (canal par canal)"""
+    """Calculs des means et std de la data base d'entraînement (canal par canal)"""
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(current_file_directory,images_dir)
     file_list = glob.glob(data_path+'/*.png')

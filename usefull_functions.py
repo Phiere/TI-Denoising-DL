@@ -10,7 +10,7 @@ def log(*args, **kwargs):
 
 
 def results_show(image1,image2,image3,ssim_scores,psnr_scores, figsize=(100,100)):
-    """Permet de visualiser l'efficacité du model.
+    """Permet de visualiser l'efficacité du modèle.
     
     - image 1 : image bruitée
     - image 2 : image débruitée
