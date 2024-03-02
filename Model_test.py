@@ -1,6 +1,7 @@
 import torch, os, argparse, time
 import usefull_functions as uf
 import data_models_generator as dmg
+import matplotlib.pyplot as plt
 
 from torch.utils.data import DataLoader
 from skimage.metrics import peak_signal_noise_ratio as psnr
@@ -79,3 +80,36 @@ def model_test() :
                              ssim_scores=(ssim_index_noise,ssim_index_denoise))
                
     return  psnr_noise_images,psnr_denoise_images,ssim_noise_images,ssim_denoise_images,denoising_time
+
+def photo_application(photo_path,model_path):
+
+
+    model = torch.load(os.path.join(current_file_directory,model_path))
+
+    model.eval()
+    DDataset = dmg.PersonalDenoiserFataset(data_path=os.path.join(current_file_directory,photo_path)
+                                    ,sigma = args.sigma,training=False)
+    DLoader = DataLoader(dataset=DDataset,batch_size=1, shuffle=True)
+
+    with torch.no_grad():
+        for  batch_x,_ in tqdm(DLoader,f" Chargement des images sig = {args.sig}"):
+                
+            #Denoising
+            noise_predicted = model(batch_x)
+            batch_predicted = batch_x - noise_predicted
+
+            #Results transformations for calculs
+            batch_x = uf.batch_visualisation(batch_x)
+            batch_predicted = uf.batch_visualisation(batch_predicted)
+            
+            #Display Results
+            f, (ax1, ax2) = plt.subplots(1, 2)
+            ax1.imshow(batch_x)
+            ax1.set_title('Image de base')
+            ax1.axis('off') 
+            ax2.imshow(batch_predicted)
+            ax2.set_title('Image Débruitée')
+            ax2.axis('off')
+               
+    return  
+

@@ -44,7 +44,7 @@ def model_training(network,optimizer,criterion,scheduler,nb_epoch,patch_size,bat
     
     #Network initialisaton/recuperation
     model = network
-    initial_epoch,model_name = uf.findLastCheckpoint(save_dir=args.model_dir) 
+    initial_epoch,model_name = uf.find_last_checkpoint(save_dir=args.model_dir) 
     if initial_epoch > 0:
         print('resuming by loading epoch %03d' % initial_epoch)
         model = torch.load(model_name)
