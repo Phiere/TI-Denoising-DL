@@ -124,7 +124,7 @@ loss_evolution = model_training(network=training_network,
                                 scheduler=training_scheduler,
                                 nb_epoch=training_nb_epoch,
                                 patch_size=training_patch_size,
-                                batch_size=training_batch_size
+                                batch_size=training_batch_size,
                                 transforms=training_transforms)
 
 
