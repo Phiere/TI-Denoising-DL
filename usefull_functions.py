@@ -1,6 +1,5 @@
 
-import sys,glob,os,re
-import datetime
+import sys,glob,os,datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -35,7 +34,10 @@ def results_show(image1,image2,image3,ssim_scores,psnr_scores, figsize=(100,100)
 
 
 def batch_visualisation(batch_in):
-    """permet d'extraire les images liées au batch en entrée pour pouvoir calculer des scores ou l'afficher"""
+    """permet d'extraire les images liées au batch en entrée pour pouvoir calculer des scores ou l'afficher
+    
+    - batch_in : batch de taille 1 à traiter
+    - batch_out : image numpy convertie"""
     batch_out = batch_in.squeeze(0).permute(1, 2, 0)
     batch_out = batch_out.cpu()
     batch_out = batch_out.detach().numpy().astype(np.float32)
@@ -44,6 +46,11 @@ def batch_visualisation(batch_in):
 
 
 def find_last_checkpoint(save_dir):
+    """Trouve le model associé à l'entrainement proposé. Donne le denier epoch utilisé pour l'entrainer.
+    
+    - save_dir : chemin de sauvegarde du model.
+    - initial_epoch : epoch à partir du quel commencer l'entrainement.
+    - model_name : nom du model associé à l'entrainement choisi."""
     file_list = glob.glob(os.path.join(save_dir, 'model_*.pth'))
     initial_epoch = 0
     model_name = ''

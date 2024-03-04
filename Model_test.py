@@ -47,7 +47,7 @@ def model_test() :
 
     model.eval()
     DDataset = dmg.DenoisingDataset(data_path=os.path.join(current_file_directory,args.test_data)
-                                    ,sigma = args.sigma,training=False)
+                                    ,sigma = args.sigma)
     DLoader = DataLoader(dataset=DDataset,batch_size=1, shuffle=True)
 
     with torch.no_grad():
@@ -87,6 +87,7 @@ def model_test() :
                
     return  psnr_noise_images,psnr_denoise_images,ssim_noise_images,ssim_denoise_images,denoising_time
 
+
 def photo_application(photo_path,model_path):
     """Mise en application du modèle pour des images déjà bruitées
     
@@ -97,7 +98,7 @@ def photo_application(photo_path,model_path):
 
     model.eval()
     DDataset = dmg.PersonalDenoiserFataset(data_path=os.path.join(current_file_directory,photo_path)
-                                    ,sigma = args.sigma,training=False)
+                                    ,sigma = args.sigma)
     DLoader = DataLoader(dataset=DDataset,batch_size=1, shuffle=True)
 
     with torch.no_grad():

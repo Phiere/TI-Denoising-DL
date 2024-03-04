@@ -1,13 +1,18 @@
-import data_models_generator as dmg
+
+import os,argparse
+import torchvision
+import matplotlib.pyplot as plt
+
+import torch
 import torch.optim as optim
-import torch,os
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
+
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-import argparse
+
 import usefull_functions as uf
+import data_models_generator as dmg
 
 current_file_directory = os.path.dirname(os.path.abspath(__file__))
 parser = argparse.ArgumentParser(description='PyTorch DnCNN')
@@ -16,7 +21,7 @@ parser.add_argument('--image_channels', default=3,type=int, help="permet de choi
 
 ##Données d'entrainement
 parser.add_argument('--train_data', default=os.path.join(current_file_directory,
-                                                         'Data_rgb/Train'), type=str, help='path of train data')
+                                                         'BSD68/Train'), type=str, help='path of train data')
 #Paramètre de sauvegarde
 parser.add_argument('--model_dir', default=os.path.join(current_file_directory,
                                                         'Models/models_rgb/sigma_25'), help='directory of the model')
@@ -37,8 +42,17 @@ training_optimizer = optim.Adam(training_network.parameters(), lr=training_learn
 training_criterion = F.mse_loss
 training_scheduler = MultiStepLR(training_optimizer, milestones=[training_nb_epoch/2], gamma=0.1) 
 
+mean_db = [0.4273080293308286, 0.4416487863396897, 0.3839654446963002] 
+std_db = [0.21955110505223274, 0.20601368640713832, 0.20300565298427553]
+training_transforms = torchvision.transforms.Compose([torchvision.transforms.Normalize(mean = mean_db,std = std_db),                                                      
+                                                          torchvision.transforms.RandomResizedCrop(size =training_patch_size,antialias=None),
+                                                          torchvision.transforms.RandomHorizontalFlip(),
+                                                          torchvision.transforms.RandomVerticalFlip(),
+                                                          torchvision.transforms.RandomRotation(30),
+                                                          ])
 
-def model_training(network,optimizer,criterion,scheduler,nb_epoch,patch_size,batch_size) :
+
+def model_training(network,optimizer,criterion,scheduler,nb_epoch,patch_size,batch_size,transforms) :
     """Entraînement et enregistement du modèle avec les options mises en paramètre
     
     network : type de réseau à entraîner
@@ -61,8 +75,7 @@ def model_training(network,optimizer,criterion,scheduler,nb_epoch,patch_size,bat
     model.train()
 
    
-    DDataset = dmg.DenoisingDataset(data_path=args.train_data,sigma = args.sigma,
-                                    patch_size=patch_size,training=True)
+    DDataset = dmg.DenoisingDataset(data_path=args.train_data,sigma = args.sigma,transforms=transforms)
     
 
     cuda = torch.cuda.is_available()
@@ -104,14 +117,18 @@ def model_training(network,optimizer,criterion,scheduler,nb_epoch,patch_size,bat
     print(f"min_loss achieved for epoch {min_epoch}")
     return loss_evolution
 
+
 loss_evolution = model_training(network=training_network,
                                 optimizer=training_optimizer,
                                 criterion=training_criterion,
                                 scheduler=training_scheduler,
                                 nb_epoch=training_nb_epoch,
                                 patch_size=training_patch_size,
-                                batch_size=training_batch_size)
+                                batch_size=training_batch_size
+                                transforms=training_transforms)
 
+
+#Affichage de la courbe de loss obtenu lors de l'entrainement.
 plt.figure()
 plt.semilogy(range(training_nb_epoch-len(loss_evolution),training_nb_epoch),loss_evolution)
 plt.title(f'loss sigma = {args.sigma}')

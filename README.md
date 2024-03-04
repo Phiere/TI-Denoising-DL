@@ -53,6 +53,6 @@ For other sigmas, the results obtained are as follows:
 
 To use the trained network, you will need to provide the path of the photo to be denoised in the photo_application function of Model_test.py. As the noise sigma of the photo is not known, it may be necessary to train a model for the studied sigma. Just run the Model_train.py script choosing the right sigma.
 
-##Conclusion:
+## Conclusion:
 
 We have successfully managed to create and use a deep learning model to denoise images to which Gaussian noise had been added. Our model still struggles to generalize to other databases.
